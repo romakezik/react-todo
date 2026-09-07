@@ -1,0 +1,217 @@
+.btn {
+    display: inline-block;
+    padding: 8px 18px;
+    border: none;
+    border-radius: var(--radius);
+    font-weight: 500;
+    font-size: 0.95rem;
+    cursor: pointer;
+    transition: background var(--transition), transform 0.1s ease;
+    background-color: var(--border-color);
+    color: var(--text-primary);
+}
+
+.btn:active {
+    transform: scale(0.97);
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+
+.btn-primary:hover {
+    background-color: var(--primary-hover);
+}
+
+.btn-danger {
+    background-color: var(--danger);
+    color: white;
+}
+
+.btn-danger:hover {
+    background-color: var(--danger-hover);
+}
+
+.btn-outline {
+    background: transparent;
+    border: 1px solid var(--border-color);
+}
+
+.btn-outline:hover {
+    background: var(--bg-body);
+}
+
+/* Формы */
+.form-group {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+}
+
+.form-input {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    background: var(--bg-body);
+    transition: border-color var(--transition);
+    min-width: 200px;
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--primary);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-error {
+    color: red;
+}
+
+/* Фильтры */
+.filters-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.filter-group {
+    display: flex;
+    border-radius: 8px;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.1);
+    overflow: hidden;
+}
+
+.filter-btn {
+    padding: 8px 20px;
+    border: none;
+    background: transparent;
+    font-size: 0.9rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: background 0.2s ease, color 0.2s ease;
+    flex: 1;
+    white-space: nowrap;
+}
+
+.filter-btn:hover {
+    background: var(--bg-body);
+    color: var(--text-primary);
+}
+
+.filter-btn.active {
+    background: var(--primary);
+    color: white;
+}
+
+.todo-count {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+/* Todo-лист */
+.todo-list {
+    margin-top: 20px;
+}
+
+.todo-item {
+    background: var(--bg-white);
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    padding: 12px 16px;
+    margin-bottom: 10px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    transition: box-shadow 0.2s ease;
+}
+
+.todo-item:hover {
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.08);
+}
+
+.todo-text {
+    font-size: 1rem;
+    flex: 1;
+    margin-right: 12px;
+    word-break: break-word;
+}
+
+.todo-text.completed {
+    text-decoration: line-through;
+    color: var(--text-muted);
+}
+
+.todo-edit-input {
+    border: none;
+    background: transparent;
+    font: inherit;
+    width: 100%;
+    padding: 0;
+    margin: 0;
+    resize: none;
+    overflow: hidden;
+    line-height: inherit;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    outline: none;
+    border-bottom: 2px solid transparent;
+    transition: border-color 0.2s ease;
+}
+
+.todo-edit-input:focus {
+    border-bottom-color: var(--primary);
+}
+
+.todo-actions {
+    display: flex;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
+.empty-message {
+    text-align: center;
+    color: var(--text-muted);
+    padding: 40px 0;
+    font-size: 1.1rem;
+}
+
+/* Профиль */
+.profile-card {
+    background: var(--bg-body);
+    padding: 24px;
+    border-radius: var(--radius);
+    margin-top: 20px;
+}
+
+.profile-card h2 {
+    margin-bottom: 12px;
+}
+
+.profile-card p {
+    margin: 6px 0;
+    color: var(--text-secondary);
+}
+
+.profile-stats {
+    display: flex;
+    gap: 24px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.profile-stats span {
+    background: white;
+    padding: 8px 16px;
+    border-radius: var(--radius);
+    font-size: 0.9rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}

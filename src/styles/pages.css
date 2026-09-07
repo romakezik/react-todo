@@ -1,0 +1,106 @@
+.auth-page {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-body);
+    padding: 20px;
+}
+
+.auth-page .card {
+    width: 100%;
+    max-width: 400px;
+    padding: 30px;
+}
+
+.auth-page h2 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: var(--text-primary);
+}
+
+.auth-page form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.auth-page .form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.auth-page .form-group label {
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: var(--text-secondary);
+}
+
+.auth-page .form-group input {
+    padding: 10px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--radius);
+    font-size: 1rem;
+    background: var(--bg-body);
+}
+
+.auth-page .form-group input:focus {
+    border-color: var(--primary);
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.auth-page .btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    margin-top: 8px;
+}
+
+.auth-footer {
+    margin-top: 10px;
+    text-align: center;
+}
+
+/* Адаптивность */
+@media (max-width: 600px) {
+    .container {
+        padding: 16px;
+        border-radius: 0;
+    }
+
+    .nav {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 10px;
+    }
+
+    .nav .user-info {
+        margin-left: 0;
+        justify-content: space-between;
+    }
+
+    .form-group {
+        flex-direction: column;
+    }
+
+    .form-input {
+        min-width: auto;
+    }
+
+    .todo-item {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .todo-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .profile-stats {
+        flex-direction: column;
+        gap: 8px;
+    }
+}
