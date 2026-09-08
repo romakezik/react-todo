@@ -1,17 +1,23 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
+
+function loadTodos(userId) {
+    if (!userId) return [];
+    try {
+        const raw = localStorage.getItem(`todos_${userId}`);
+        return raw ? JSON.parse(raw) : [];
+    } catch {
+        return [];
+    }
+}
 
 function useTodos(userId) {
-    const [todos, setTodos] = useState([]);
+    const [todos, setTodos] = useState(() => loadTodos(userId));
+    const [prevUserId, setPrevUserId] = useState(userId);
 
-    useEffect(() => {
-        if (!userId) { setTodos([]); return; }
-        try {
-            const raw = localStorage.getItem(`todos_${userId}`);
-            setTodos(raw ? JSON.parse(raw) : []);
-        } catch {
-            setTodos([]);
-        }
-    }, [userId]);
+    if (prevUserId !== userId) {
+        setPrevUserId(userId);
+        setTodos(loadTodos(userId));
+    }
 
     const update = (makeNext) => {
         setTodos(prev => {
