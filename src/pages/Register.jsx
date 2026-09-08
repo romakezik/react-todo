@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import RegisterForm from '../components/RegisterForm';
+import { Link } from "react-router-dom";
+import RegisterForm from "../components/RegisterForm";
 
 function Register() {
   return (
@@ -7,7 +7,7 @@ function Register() {
       <div className="card">
         <h2>Регистрация</h2>
         <RegisterForm />
-        <p className='auth-footer'>
+        <p className="auth-footer">
           Уже есть аккаунт? <Link to="/login">Войти</Link>
         </p>
       </div>

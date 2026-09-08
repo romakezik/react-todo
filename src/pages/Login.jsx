@@ -1,5 +1,5 @@
-import { Link } from 'react-router-dom';
-import LoginForm from '../components/LoginForm';
+import { Link } from "react-router-dom";
+import LoginForm from "../components/LoginForm";
 
 function Login() {
   return (
@@ -7,7 +7,7 @@ function Login() {
       <div className="card">
         <h2>Вход</h2>
         <LoginForm />
-        <p className='auth-footer'>
+        <p className="auth-footer">
           Нет аккаунта? <Link to="/register">Зарегистрироваться</Link>
         </p>
       </div>
