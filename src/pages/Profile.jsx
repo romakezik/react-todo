@@ -17,7 +17,7 @@ function Profile() {
                 </div>
             </div>
             <div className="profile-card">
-                <h1>Удалить профиль</h1>
+                <h2>Удалить профиль</h2>
                 <button className="btn btn-danger" onClick={() => {
                     if (window.confirm('Вы уверены, что хотите удалить профиль?')) {
                         deleteProfile();

@@ -77,7 +77,7 @@ function Home() {
                                     <span className={`todo-text ${todo.completed ? 'completed' : ''}`}
                                         onDoubleClick={() => {
                                             if (editingId === todo.id) return;
-                                            setEditingId(todo.id); 
+                                            setEditingId(todo.id);
                                             setEditText(todo.text)
                                         }}>
                                         {editingId === todo.id ? (
@@ -112,8 +112,7 @@ function Home() {
                                     </span>
                                     <div className="todo-actions">
                                         <button className="btn btn-outline"
-                                            onClick={() => toggleTodo(todo.id)}
-                                            aria-label={todo.completed ? 'Вернуть задачу' : 'Отметить выполненной'}>
+                                            onClick={() => toggleTodo(todo.id)}>
                                             {todo.completed ? 'отменить' : 'Отметить'}
                                         </button>
                                         <button className="btn btn-danger"

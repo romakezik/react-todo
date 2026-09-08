@@ -13,7 +13,7 @@ function Layout() {
 
           <span className="user-name">{user.name}</span>
           <button className=' nav-link'
-            onClick={() => { logout(); }}>Выйти</button>
+            onClick={logout}>Выйти</button>
         </div>
       </nav>
       <main>
