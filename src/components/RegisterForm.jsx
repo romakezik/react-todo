@@ -14,9 +14,6 @@ function RegisterForm() {
         e.preventDefault();
         setError('');
         try {
-            if (name === '' || email === '' || password === '') {
-                throw new Error('Заполните все поля');
-            }
             register(name, email, password);
             navigate('/');
         } catch (e) {
@@ -25,7 +22,7 @@ function RegisterForm() {
     };
 
     return (
-        <form onSubmit={(e) => handleSubmit(e)}>
+        <form onSubmit={handleSubmit}>
             <div className="form-group">
                 <label>Имя</label>
                 <input

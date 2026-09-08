@@ -11,11 +11,8 @@ function LoginForm() {
 
     const handleSubmit = (e) => {
         e.preventDefault();
-        setError('')
+        setError('');
         try {
-            if (password === '' || email === '') {
-                throw new Error('Заполните поля');
-            }
             login(email, password);
             navigate('/');
         } catch (e) {
@@ -24,7 +21,7 @@ function LoginForm() {
     };
 
     return (
-        <form onSubmit={(e) => handleSubmit(e)}>
+        <form onSubmit={handleSubmit}>
             <div className="form-group">
                 <label>Почта</label>
                 <input
