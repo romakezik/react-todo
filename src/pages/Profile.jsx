@@ -1,4 +1,4 @@
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from '../hooks/useAuth';
 import useTodos from "../hooks/useTodos"
 function Profile() {
     const { user, deleteProfile } = useAuth()

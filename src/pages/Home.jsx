@@ -1,5 +1,5 @@
 import useTodos from "../hooks/useTodos"
-import { useAuth } from "../context/AuthContext"
+import { useAuth } from '../hooks/useAuth';
 import { useState, useRef } from "react"
 import TextareaAutosize from 'react-textarea-autosize';
 function Home() {
