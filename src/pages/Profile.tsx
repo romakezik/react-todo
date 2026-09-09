@@ -7,13 +7,20 @@ function Profile() {
     <div className="container">
       <h1>Ваш профиль</h1>
       <div className="profile-card">
-        <h2>Данные профиля</h2>
-        <p>
-          <strong>Имя:</strong> {user.name}
-        </p>
-        <p>
-          <strong>Почта:</strong> {user.email}
-        </p>
+        {user ? (
+          <>
+            <h2>Данные профиля</h2>
+            <p>
+              <strong>Имя:</strong> {user.name}
+            </p>
+            <p>
+              <strong>Почта:</strong> {user.email}
+            </p>
+          </>
+        ) : (
+          null
+        )}
+
         <div className="profile-stats">
           <span>Выполнено: {todos.filter((t) => t.completed).length}</span>
           <span>Всего задач: {todos.length}</span>

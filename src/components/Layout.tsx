@@ -12,10 +12,16 @@ function Layout() {
         </NavLink>
         {user && <NavLink to="/profile">Профиль</NavLink>}
         <div className="user-info">
-          <span className="user-name">{user.name}</span>
-          <button className=" nav-link" onClick={logout}>
-            Выйти
-          </button>
+          {user ? (
+            <>
+              <span className="user-name">{user.name}</span>
+              <button className="nav-link" onClick={logout}>
+                Выйти
+              </button>
+            </>
+          ) : (
+            null
+          )}
         </div>
       </nav>
       <main>

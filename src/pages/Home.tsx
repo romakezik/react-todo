@@ -9,7 +9,7 @@ function Home() {
   );
   const [text, setText] = useState("");
   const [filter, setFilter] = useState("all");
-  const [editingId, setEditingId] = useState(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const escapeRef = useRef(false);
 
@@ -104,12 +104,12 @@ function Home() {
                       onKeyDown={(e) => {
                         if (e.key === "Enter") {
                           e.preventDefault();
-                          e.target.blur();
+                          e.currentTarget.blur();
                         }
                         if (e.key === "Escape") {
                           e.preventDefault();
                           escapeRef.current = true;
-                          e.target.blur();
+                          e.currentTarget.blur();
                         }
                       }}
                     />

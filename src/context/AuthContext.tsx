@@ -2,7 +2,11 @@ import { JSX, ReactNode, useState } from "react";
 import { AuthContext } from "../hooks/useAuth";
 import { StoredUser, User } from "../types";
 
-export function AuthProvider({ children }: { children: ReactNode }): JSX.Element {
+export function AuthProvider({
+  children,
+}: {
+  children: ReactNode;
+}): JSX.Element {
   const [user, setUser] = useState<User | null>(() => {
     try {
       const raw: string | null = localStorage.getItem("user");
@@ -22,21 +26,21 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
   }
 
   const login = (email: string, password: string) => {
-    const users: StoredUser[] = readUsers();
+    const users = readUsers();
 
-    const user: StoredUser | undefined = users.find((u) => u.email === email);
+    const user = users.find((u) => u.email === email);
 
     if (!user) throw new Error("Пользователь с таким email не найден");
 
     if (user.password !== password) throw new Error("Неверный пароль");
 
-    const userData: { id: string, name: string, email: string } = { id: user.id, name: user.name, email: user.email };
+    const userData: User = { id: user.id, name: user.name, email: user.email };
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
 
   const register = (name: string, email: string, password: string) => {
-    let users: StoredUser[] = readUsers();
+    const users: StoredUser[] = readUsers();
 
     const userExists: boolean = users.some((user) => user.email === email);
 
@@ -44,7 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }): JSX.Element
       throw new Error("Этот email уже зарегистрирован");
     }
 
-    let newUser: StoredUser = {
+    const newUser: StoredUser = {
       id: crypto.randomUUID(),
       name: name,
       email: email,

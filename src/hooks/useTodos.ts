@@ -13,7 +13,7 @@ function loadTodos(userId: string | undefined): Todo[] {
 
 function useTodos(userId: string | undefined) {
   const [todos, setTodos] = useState<Todo[]>(() => loadTodos(userId));
-  const [prevUserId, setPrevUserId] = useState<string | undefined>(userId);
+  const [prevUserId, setPrevUserId] = useState(userId);
 
   if (prevUserId !== userId) {
     setPrevUserId(userId);
@@ -28,23 +28,26 @@ function useTodos(userId: string | undefined) {
     });
   };
 
-  const addTodo = (text: string|undefined) => {
+  const addTodo = (text: string) => {
     if (!text) return;
     const t = text.trim();
-    update((prev) => [...prev,{ id: crypto.randomUUID(), text: t, completed: false }]);
+    update((prev) => [
+      ...prev,
+      { id: crypto.randomUUID(), text: t, completed: false },
+    ]);
   };
 
-  const toggleTodo = (id : string|undefined) => {
+  const toggleTodo = (id: string) => {
     update((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
     );
   };
 
-  const deleteTodo = (id: string|undefined) => {
+  const deleteTodo = (id: string) => {
     update((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const editTodo = (id: string|undefined, text: string|undefined) => {
+  const editTodo = (id: string, text: string) => {
     if (!text) return;
     const trimmed = text.trim();
     update((prev) =>

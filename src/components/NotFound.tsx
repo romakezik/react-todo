@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
+import { JSX } from "react";
 
-export default function NotFound() {
+export default function NotFound(): JSX.Element {
   return (
     <div className="container">
       <h1>404</h1>

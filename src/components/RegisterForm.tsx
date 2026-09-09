@@ -10,14 +10,18 @@ function RegisterForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     try {
       register(name, email, password);
       navigate("/");
     } catch (e) {
-      setError(e.message);
+      if (e instanceof Error) {
+        setError(e.message);
+      } else {
+        setError("Неизвестная ошибка");
+      }
     }
   };
 
@@ -30,7 +34,7 @@ function RegisterForm() {
           required
           type="text"
           value={name}
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setName(e.target.value);
             setError("");
           }}
@@ -43,7 +47,7 @@ function RegisterForm() {
           required
           type="email"
           value={email}
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setEmail(e.target.value);
             setError("");
           }}
@@ -56,7 +60,7 @@ function RegisterForm() {
           required
           type="password"
           value={password}
-          onChange={(e) => {
+          onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
             setPassword(e.target.value);
             setError("");
           }}
