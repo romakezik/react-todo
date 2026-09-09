@@ -1,26 +1,31 @@
-import { useState } from "react";
+import { JSX, ReactNode, useState } from "react";
 import { AuthContext } from "../hooks/useAuth";
+import { StoredUser, User } from "../types";
 
-export function AuthProvider({ children }) {
-  const [user, setUser] = useState(() => {
+export function AuthProvider({
+  children,
+}: {
+  children: ReactNode;
+}): JSX.Element {
+  const [user, setUser] = useState<User | null>(() => {
     try {
-      const raw = localStorage.getItem("user");
+      const raw: string | null = localStorage.getItem("user");
       return raw ? JSON.parse(raw) : null;
     } catch {
       return null;
     }
   });
 
-  function readUsers() {
+  function readUsers(): StoredUser[] {
     try {
-      const raw = localStorage.getItem("users");
+      const raw: string | null = localStorage.getItem("users");
       return raw ? JSON.parse(raw) : [];
     } catch {
       return [];
     }
   }
 
-  const login = (email, password) => {
+  const login = (email: string, password: string) => {
     const users = readUsers();
 
     const user = users.find((u) => u.email === email);
@@ -29,21 +34,21 @@ export function AuthProvider({ children }) {
 
     if (user.password !== password) throw new Error("Неверный пароль");
 
-    const userData = { id: user.id, name: user.name, email: user.email };
+    const userData: User = { id: user.id, name: user.name, email: user.email };
     localStorage.setItem("user", JSON.stringify(userData));
     setUser(userData);
   };
 
-  const register = (name, email, password) => {
-    let users = readUsers();
+  const register = (name: string, email: string, password: string) => {
+    const users: StoredUser[] = readUsers();
 
-    const userExists = users.some((user) => user.email === email);
+    const userExists: boolean = users.some((user) => user.email === email);
 
     if (userExists) {
       throw new Error("Этот email уже зарегистрирован");
     }
 
-    let newUser = {
+    const newUser: StoredUser = {
       id: crypto.randomUUID(),
       name: name,
       email: email,
@@ -53,7 +58,7 @@ export function AuthProvider({ children }) {
     users.push(newUser);
     localStorage.setItem("users", JSON.stringify(users));
 
-    const userData = {
+    const userData: User = {
       id: newUser.id,
       name: newUser.name,
       email: newUser.email,
@@ -68,8 +73,9 @@ export function AuthProvider({ children }) {
   };
 
   const deleteProfile = () => {
-    const users = readUsers();
-    const updatedUsers = users.filter((u) => u.id !== user.id);
+    if (!user) return;
+    const users: StoredUser[] = readUsers();
+    const updatedUsers: StoredUser[] = users.filter((u) => u.id !== user.id);
     localStorage.removeItem(`todos_${user.id}`);
     localStorage.setItem("users", JSON.stringify(updatedUsers));
     logout();

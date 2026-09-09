@@ -1,6 +1,7 @@
 import { useState } from "react";
+import { Todo } from "../types";
 
-function loadTodos(userId) {
+function loadTodos(userId: string | undefined): Todo[] {
   if (!userId) return [];
   try {
     const raw = localStorage.getItem(`todos_${userId}`);
@@ -10,8 +11,8 @@ function loadTodos(userId) {
   }
 }
 
-function useTodos(userId) {
-  const [todos, setTodos] = useState(() => loadTodos(userId));
+function useTodos(userId: string | undefined) {
+  const [todos, setTodos] = useState<Todo[]>(() => loadTodos(userId));
   const [prevUserId, setPrevUserId] = useState(userId);
 
   if (prevUserId !== userId) {
@@ -19,7 +20,7 @@ function useTodos(userId) {
     setTodos(loadTodos(userId));
   }
 
-  const update = (makeNext) => {
+  const update = (makeNext: (prev: Todo[]) => Todo[]) => {
     setTodos((prev) => {
       const next = makeNext(prev);
       if (userId) localStorage.setItem(`todos_${userId}`, JSON.stringify(next));
@@ -27,34 +28,34 @@ function useTodos(userId) {
     });
   };
 
-  const addTodo = (text) => {
+  const addTodo = (text: string) => {
+    if (!text) return;
     const t = text.trim();
-    if (!t) return;
     update((prev) => [
       ...prev,
       { id: crypto.randomUUID(), text: t, completed: false },
     ]);
   };
 
-  const toggleTodo = (id) => {
+  const toggleTodo = (id: string) => {
     update((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
     );
   };
 
-  const deleteTodo = (id) => {
+  const deleteTodo = (id: string) => {
     update((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const editTodo = (id, text) => {
+  const editTodo = (id: string, text: string) => {
+    if (!text) return;
     const trimmed = text.trim();
-    if (!trimmed) return;
     update((prev) =>
       prev.map((t) => (t.id === id ? { ...t, text: trimmed } : t)),
     );
   };
 
-  return { todos, addTodo, toggleTodo, deleteTodo, editTodo };
+  return { todos, addTodo, toggleTodo, deleteTodo, editTodo } as const;
 }
 
 export default useTodos;
