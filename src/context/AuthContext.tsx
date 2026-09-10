@@ -10,7 +10,7 @@ export function AuthProvider({
   const [user, setUser] = useState<User | null>(() => {
     try {
       const raw: string | null = localStorage.getItem("user");
-      return raw ? JSON.parse(raw) : null;
+      return raw ? JSON.parse(raw) as User : null;
     } catch {
       return null;
     }
@@ -19,7 +19,7 @@ export function AuthProvider({
   function readUsers(): StoredUser[] {
     try {
       const raw: string | null = localStorage.getItem("users");
-      return raw ? JSON.parse(raw) : [];
+      return raw ? JSON.parse(raw) as StoredUser[] : [];
     } catch {
       return [];
     }
