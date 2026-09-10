@@ -4,10 +4,6 @@ export interface User {
   email: string;
 }
 
-export interface StoredUser extends User {
-  password: string;
-}
-
 export interface Todo {
   id: string;
   text: string;
@@ -15,8 +11,9 @@ export interface Todo {
 }
 export interface AuthContextValue {
   user: User | null;
-  login: (email: string, password: string) => void;
-  register: (name: string, email: string, password: string) => void;
-  logout: () => void;
-  deleteProfile: () => void;
+  loading: boolean;
+  login: (email: string, password: string) => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<void>;
+  logout: () => Promise<void>;
+  deleteProfile: () => Promise<void>;
 }

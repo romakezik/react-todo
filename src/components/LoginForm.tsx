@@ -9,11 +9,11 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     try {
-      login(email, password);
+      await login(email, password);
       navigate("/");
     } catch (err) {
       if (err instanceof Error) {
