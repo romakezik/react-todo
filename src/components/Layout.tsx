@@ -19,9 +19,7 @@ function Layout() {
                 Выйти
               </button>
             </>
-          ) : (
-            null
-          )}
+          ) : null}
         </div>
       </nav>
       <main>

@@ -1,6 +1,6 @@
 import { JSX, ReactNode, useEffect, useState } from "react";
 import { AuthContext } from "../hooks/useAuth";
-import { User } from "../types";
+import { User } from "../types/types";
 import { supabase } from "../lib/supabase";
 
 function toUser(su: {
@@ -8,10 +8,18 @@ function toUser(su: {
   email?: string | null;
   user_metadata?: { name?: string } | null;
 }): User {
-  return { id: su.id, email: su.email ?? "", name: su.user_metadata?.name ?? "" };
-};
+  return {
+    id: su.id,
+    email: su.email ?? "",
+    name: su.user_metadata?.name ?? "",
+  };
+}
 
-export function AuthProvider({ children }: { children: ReactNode; }): JSX.Element {
+export function AuthProvider({
+  children,
+}: {
+  children: ReactNode;
+}): JSX.Element {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -31,7 +39,10 @@ export function AuthProvider({ children }: { children: ReactNode; }): JSX.Elemen
   }, []);
 
   const login = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
     if (error) throw new Error(error.message);
   };
 

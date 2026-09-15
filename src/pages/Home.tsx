@@ -4,9 +4,8 @@ import { useState, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 function Home() {
   const { user } = useAuth();
-  const { todos, loading, error, addTodo, toggleTodo, deleteTodo, editTodo } = useTodos(
-    user?.id,
-  );
+  const { todos, loading, error, addTodo, toggleTodo, deleteTodo, editTodo } =
+    useTodos(user?.id);
   const [text, setText] = useState("");
   const [filter, setFilter] = useState("all");
   const [editingId, setEditingId] = useState<string | null>(null);
