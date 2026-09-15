@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 function Home() {
   const { user } = useAuth();
-  const { todos, addTodo, toggleTodo, deleteTodo, editTodo } = useTodos(
+  const { todos, loading, error, addTodo, toggleTodo, deleteTodo, editTodo } = useTodos(
     user?.id,
   );
   const [text, setText] = useState("");
@@ -71,7 +71,11 @@ function Home() {
             Осталось: {todos.filter((t) => !t.completed).length}
           </span>
         </div>
-        {todos.length === 0 ? (
+        {loading ? (
+          <div className="card empty-message">Загружаем задачи…</div>
+        ) : error ? (
+          <div className="card empty-message">Ошибка загрузки: {error}</div>
+        ) : todos.length === 0 ? (
           <div className="card empty-message">Пока ничего нет</div>
         ) : filteredTodos.length === 0 ? (
           <div className="card empty-message">В этой категории пусто</div>

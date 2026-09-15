@@ -1,61 +1,120 @@
-import { useState } from "react";
-import { Todo } from "../types";
-
-function loadTodos(userId: string | undefined): Todo[] {
-  if (!userId) return [];
-  try {
-    const raw = localStorage.getItem(`todos_${userId}`);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
+import type { Todo } from "../types/types";
 
 function useTodos(userId: string | undefined) {
-  const [todos, setTodos] = useState<Todo[]>(() => loadTodos(userId));
-  const [prevUserId, setPrevUserId] = useState(userId);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (prevUserId !== userId) {
-    setPrevUserId(userId);
-    setTodos(loadTodos(userId));
-  }
+  useEffect(() => {
+    if (!userId) {
+      setTodos([]);
+      setLoading(false);
+      return;
+    }
 
-  const update = (makeNext: (prev: Todo[]) => Todo[]) => {
-    setTodos((prev) => {
-      const next = makeNext(prev);
-      if (userId) localStorage.setItem(`todos_${userId}`, JSON.stringify(next));
-      return next;
-    });
-  };
+    let cancelled = false;
 
-  const addTodo = (text: string) => {
-    if (!text) return;
+    async function fetchTodos() {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .from("todos")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (cancelled) return;
+      if (error) setError(error.message);
+      else setTodos(data ?? []);
+      setLoading(false);
+    }
+
+    fetchTodos();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  const addTodo = async (text: string) => {
     const t = text.trim();
-    update((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), text: t, completed: false },
-    ]);
+    if (!t || !userId) return;
+    setError(null);
+
+    const { data, error } = await supabase
+      .from("todos")
+      .insert({ user_id: userId, text: t })
+      .select()
+      .single();
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setTodos((prev) => [data, ...prev]);
   };
 
-  const toggleTodo = (id: string) => {
-    update((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
-    );
+  const toggleTodo = async (id: string) => {
+    const todo = todos.find((t) => t.id === id);
+    if (!todo) return;
+    setError(null);
+
+    const { data, error } = await supabase
+      .from("todos")
+      .update({ completed: !todo.completed })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
   };
 
-  const deleteTodo = (id: string) => {
-    update((prev) => prev.filter((t) => t.id !== id));
+  const deleteTodo = async (id: string) => {
+    setError(null);
+
+    const { error } = await supabase.from("todos").delete().eq("id", id);
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setTodos((prev) => prev.filter((t) => t.id !== id));
   };
 
-  const editTodo = (id: string, text: string) => {
-    if (!text) return;
+  const editTodo = async (id: string, text: string) => {
     const trimmed = text.trim();
-    update((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, text: trimmed } : t)),
-    );
+    if (!trimmed) return;
+    setError(null);
+
+    const { data, error } = await supabase
+      .from("todos")
+      .update({ text: trimmed })
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      setError(error.message);
+      return;
+    }
+    setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
   };
 
-  return { todos, addTodo, toggleTodo, deleteTodo, editTodo } as const;
+  return {
+    todos,
+    loading,
+    error,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    editTodo,
+  } as const;
 }
 
 export default useTodos;
