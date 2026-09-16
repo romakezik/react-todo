@@ -10,11 +10,7 @@ function useTodos(userId: string | undefined) {
   const [pendingId, setPendingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!userId) {
-      setTodos([]);
-      setLoading(false);
-      return;
-    }
+    if (!userId) return;
 
     let cancelled = false;
 
