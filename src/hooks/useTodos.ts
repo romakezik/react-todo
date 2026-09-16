@@ -7,6 +7,7 @@ function useTodos(userId: string | undefined) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) {
@@ -58,22 +59,28 @@ function useTodos(userId: string | undefined) {
   };
 
   const toggleTodo = async (id: string) => {
+    if (pendingId) return;
     const todo = todos.find((t) => t.id === id);
     if (!todo) return;
+
     setActionError(null);
+    setPendingId(id);
+    try {
+      const { data, error } = await supabase
+        .from("todos")
+        .update({ completed: !todo.completed })
+        .eq("id", id)
+        .select()
+        .single();
 
-    const { data, error } = await supabase
-      .from("todos")
-      .update({ completed: !todo.completed })
-      .eq("id", id)
-      .select()
-      .single();
-
-    if (error) {
-      setActionError(error.message);
-      return;
+      if (error) {
+        setActionError(error.message);
+        return;
+      }
+      setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
+    } finally {
+      setPendingId(null);
     }
-    setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
   };
 
   const deleteTodo = async (id: string) => {
@@ -112,6 +119,7 @@ function useTodos(userId: string | undefined) {
     loading,
     error,
     actionError,
+    pendingId,
     addTodo,
     toggleTodo,
     deleteTodo,

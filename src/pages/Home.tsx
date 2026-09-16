@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 function Home() {
   const { user } = useAuth();
-  const { todos, loading, error, actionError, addTodo, toggleTodo, deleteTodo, editTodo } =
+  const { todos, loading, error, actionError, pendingId, addTodo, toggleTodo, deleteTodo, editTodo } =
     useTodos(user?.id);
   const [text, setText] = useState("");
   const [filter, setFilter] = useState("all");
@@ -127,6 +127,7 @@ function Home() {
                   <button
                     className="btn btn-outline"
                     onClick={() => toggleTodo(todo.id)}
+                    disabled={pendingId !== null}
                   >
                     {todo.completed ? "отменить" : "Отметить"}
                   </button>
