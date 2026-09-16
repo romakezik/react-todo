@@ -4,7 +4,7 @@ import { useState, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 function Home() {
   const { user } = useAuth();
-  const { todos, loading, error, addTodo, toggleTodo, deleteTodo, editTodo } =
+  const { todos, loading, error, actionError, addTodo, toggleTodo, deleteTodo, editTodo } =
     useTodos(user?.id);
   const [text, setText] = useState("");
   const [filter, setFilter] = useState("all");
@@ -70,6 +70,9 @@ function Home() {
             Осталось: {todos.filter((t) => !t.completed).length}
           </span>
         </div>
+        {actionError && (
+          <div className="form-error">Не удалось сохранить: {actionError}</div>
+        )}
         {loading ? (
           <div className="card empty-message">Загружаем задачи…</div>
         ) : error ? (

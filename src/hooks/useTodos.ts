@@ -6,6 +6,7 @@ function useTodos(userId: string | undefined) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!userId) {
@@ -41,7 +42,7 @@ function useTodos(userId: string | undefined) {
   const addTodo = async (text: string) => {
     const t = text.trim();
     if (!t || !userId) return;
-    setError(null);
+    setActionError(null);
 
     const { data, error } = await supabase
       .from("todos")
@@ -50,7 +51,7 @@ function useTodos(userId: string | undefined) {
       .single();
 
     if (error) {
-      setError(error.message);
+      setActionError(error.message);
       return;
     }
     setTodos((prev) => [data, ...prev]);
@@ -59,7 +60,7 @@ function useTodos(userId: string | undefined) {
   const toggleTodo = async (id: string) => {
     const todo = todos.find((t) => t.id === id);
     if (!todo) return;
-    setError(null);
+    setActionError(null);
 
     const { data, error } = await supabase
       .from("todos")
@@ -69,19 +70,19 @@ function useTodos(userId: string | undefined) {
       .single();
 
     if (error) {
-      setError(error.message);
+      setActionError(error.message);
       return;
     }
     setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
   };
 
   const deleteTodo = async (id: string) => {
-    setError(null);
+    setActionError(null);
 
     const { error } = await supabase.from("todos").delete().eq("id", id);
 
     if (error) {
-      setError(error.message);
+      setActionError(error.message);
       return;
     }
     setTodos((prev) => prev.filter((t) => t.id !== id));
@@ -90,7 +91,7 @@ function useTodos(userId: string | undefined) {
   const editTodo = async (id: string, text: string) => {
     const trimmed = text.trim();
     if (!trimmed) return;
-    setError(null);
+    setActionError(null);
 
     const { data, error } = await supabase
       .from("todos")
@@ -100,7 +101,7 @@ function useTodos(userId: string | undefined) {
       .single();
 
     if (error) {
-      setError(error.message);
+      setActionError(error.message);
       return;
     }
     setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
@@ -110,6 +111,7 @@ function useTodos(userId: string | undefined) {
     todos,
     loading,
     error,
+    actionError,
     addTodo,
     toggleTodo,
     deleteTodo,
