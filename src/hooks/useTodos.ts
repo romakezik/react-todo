@@ -74,7 +74,9 @@ function useTodos(userId: string | undefined) {
     setActionError(null);
     setPendingId(id);
 
-    setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, completed: next } : t)));
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, completed: next } : t)),
+    );
 
     try {
       const { data, error } = await supabase
@@ -85,7 +87,11 @@ function useTodos(userId: string | undefined) {
         .single();
 
       if (error) {
-        setTodos((prev) => prev.map((t) => (t.id === id ? { ...t, completed: todo.completed } : t)));
+        setTodos((prev) =>
+          prev.map((t) =>
+            t.id === id ? { ...t, completed: todo.completed } : t,
+          ),
+        );
         setActionError(error.message);
         return;
       }
@@ -97,14 +103,14 @@ function useTodos(userId: string | undefined) {
 
   const deleteTodo = async (id: string) => {
     if (pendingId) return;
-    const index = todos.findIndex((t) => t.id === id)
+    const index = todos.findIndex((t) => t.id === id);
     if (index === -1) return;
     const target = todos[index];
 
     setActionError(null);
     setPendingId(id);
 
-    setTodos((prev) => prev.filter((t) => t.id !== id))
+    setTodos((prev) => prev.filter((t) => t.id !== id));
 
     try {
       const { error } = await supabase.from("todos").delete().eq("id", id);
@@ -113,11 +119,11 @@ function useTodos(userId: string | undefined) {
           const copy = [...prev];
           copy.splice(index, 0, target);
           return copy;
-        })
+        });
         setActionError(error.message);
       }
     } finally {
-      setPendingId(null)
+      setPendingId(null);
     }
   };
 
@@ -125,13 +131,15 @@ function useTodos(userId: string | undefined) {
     if (pendingId) return;
     const trimmed = text.trim();
     if (!trimmed) return;
-    const target = todos.find((t) => t.id === id)
+    const target = todos.find((t) => t.id === id);
     if (!target || target.text === trimmed) return;
 
     setActionError(null);
     setPendingId(id);
 
-    setTodos((prev) => prev.map((t) => t.id === id ? { ...t, text: trimmed } : t))
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, text: trimmed } : t)),
+    );
     try {
       const { error } = await supabase
         .from("todos")
@@ -141,7 +149,9 @@ function useTodos(userId: string | undefined) {
         .single();
 
       if (error) {
-        setTodos((prev) => prev.map((t) => t.id === id ? { ...t, text: target?.text } : t))
+        setTodos((prev) =>
+          prev.map((t) => (t.id === id ? { ...t, text: target?.text } : t)),
+        );
         setActionError(error.message);
       }
     } finally {
