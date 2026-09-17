@@ -61,7 +61,8 @@ export function AuthProvider({
 
   const deleteProfile = async () => {
     if (!user) return;
-    await supabase.from("todos").delete().eq("user_id", user.id);
+    const { error } = await supabase.rpc("delete_own_account");
+    if (error) throw new Error(error.message);
     await supabase.auth.signOut();
   };
 
