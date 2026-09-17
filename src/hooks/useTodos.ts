@@ -1,61 +1,175 @@
-import { useState } from "react";
-import { Todo } from "../types";
-
-function loadTodos(userId: string | undefined): Todo[] {
-  if (!userId) return [];
-  try {
-    const raw = localStorage.getItem(`todos_${userId}`);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-}
+import { useState, useEffect } from "react";
+import { supabase } from "../lib/supabase";
+import type { Todo } from "../types/types";
 
 function useTodos(userId: string | undefined) {
-  const [todos, setTodos] = useState<Todo[]>(() => loadTodos(userId));
-  const [prevUserId, setPrevUserId] = useState(userId);
+  const [todos, setTodos] = useState<Todo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [actionError, setActionError] = useState<string | null>(null);
+  const [pendingId, setPendingId] = useState<string | null>(null);
 
-  if (prevUserId !== userId) {
-    setPrevUserId(userId);
-    setTodos(loadTodos(userId));
-  }
+  useEffect(() => {
+    if (!userId) return;
 
-  const update = (makeNext: (prev: Todo[]) => Todo[]) => {
-    setTodos((prev) => {
-      const next = makeNext(prev);
-      if (userId) localStorage.setItem(`todos_${userId}`, JSON.stringify(next));
-      return next;
-    });
-  };
+    let cancelled = false;
 
-  const addTodo = (text: string) => {
-    if (!text) return;
+    async function fetchTodos() {
+      setLoading(true);
+      setError(null);
+
+      const { data, error } = await supabase
+        .from("todos")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (cancelled) return;
+      if (error) setError(error.message);
+      else setTodos(data ?? []);
+      setLoading(false);
+    }
+
+    fetchTodos();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [userId]);
+
+  const addTodo = async (text: string) => {
     const t = text.trim();
-    update((prev) => [
-      ...prev,
-      { id: crypto.randomUUID(), text: t, completed: false },
-    ]);
+    if (!t || !userId) return;
+    setActionError(null);
+
+    const optimistic: Todo = {
+      id: crypto.randomUUID(),
+      user_id: userId,
+      text: t,
+      completed: false,
+      created_at: new Date().toISOString(),
+    };
+    setTodos((prev) => [optimistic, ...prev]);
+
+    const { data, error } = await supabase
+      .from("todos")
+      .insert({ user_id: userId, text: t })
+      .select()
+      .single();
+
+    if (error) {
+      setTodos((prev) => prev.filter((t) => t.id !== optimistic.id));
+      setActionError(error.message);
+      return;
+    }
+
+    setTodos((prev) => prev.map((t) => (t.id === optimistic.id ? data : t)));
   };
 
-  const toggleTodo = (id: string) => {
-    update((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, completed: !t.completed } : t)),
+  const toggleTodo = async (id: string) => {
+    if (pendingId) return;
+    const todo = todos.find((t) => t.id === id);
+    if (!todo) return;
+    const next = !todo.completed;
+
+    setActionError(null);
+    setPendingId(id);
+
+    setTodos((prev) =>
+      prev.map((t) => (t.id === id ? { ...t, completed: next } : t)),
     );
+
+    try {
+      const { data, error } = await supabase
+        .from("todos")
+        .update({ completed: !todo.completed })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        setTodos((prev) =>
+          prev.map((t) =>
+            t.id === id ? { ...t, completed: todo.completed } : t,
+          ),
+        );
+        setActionError(error.message);
+        return;
+      }
+      setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
+    } finally {
+      setPendingId(null);
+    }
   };
 
-  const deleteTodo = (id: string) => {
-    update((prev) => prev.filter((t) => t.id !== id));
+  const deleteTodo = async (id: string) => {
+    if (pendingId) return;
+    const index = todos.findIndex((t) => t.id === id);
+    if (index === -1) return;
+    const target = todos[index];
+
+    setActionError(null);
+    setPendingId(id);
+
+    setTodos((prev) => prev.filter((t) => t.id !== id));
+
+    try {
+      const { error } = await supabase.from("todos").delete().eq("id", id);
+      if (error) {
+        setTodos((prev) => {
+          const copy = [...prev];
+          copy.splice(index, 0, target);
+          return copy;
+        });
+        setActionError(error.message);
+      }
+    } finally {
+      setPendingId(null);
+    }
   };
 
-  const editTodo = (id: string, text: string) => {
-    if (!text) return;
+  const editTodo = async (id: string, text: string) => {
+    if (pendingId) return;
     const trimmed = text.trim();
-    update((prev) =>
+    if (!trimmed) return;
+    const target = todos.find((t) => t.id === id);
+    if (!target || target.text === trimmed) return;
+
+    setActionError(null);
+    setPendingId(id);
+
+    setTodos((prev) =>
       prev.map((t) => (t.id === id ? { ...t, text: trimmed } : t)),
     );
+    try {
+      const { error } = await supabase
+        .from("todos")
+        .update({ text: trimmed })
+        .eq("id", id)
+        .select()
+        .single();
+
+      if (error) {
+        setTodos((prev) =>
+          prev.map((t) => (t.id === id ? { ...t, text: target?.text } : t)),
+        );
+        setActionError(error.message);
+      }
+    } finally {
+      setPendingId(null);
+    }
   };
 
-  return { todos, addTodo, toggleTodo, deleteTodo, editTodo } as const;
+  return {
+    todos,
+    loading,
+    error,
+    actionError,
+    pendingId,
+    addTodo,
+    toggleTodo,
+    deleteTodo,
+    editTodo,
+  } as const;
 }
 
 export default useTodos;

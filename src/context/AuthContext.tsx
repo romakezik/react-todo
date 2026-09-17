@@ -1,89 +1,74 @@
-import { JSX, ReactNode, useState } from "react";
+import { JSX, ReactNode, useEffect, useState } from "react";
 import { AuthContext } from "../hooks/useAuth";
-import { StoredUser, User } from "../types";
+import { User } from "../types/types";
+import { supabase } from "../lib/supabase";
+
+function toUser(su: {
+  id: string;
+  email?: string | null;
+  user_metadata?: { name?: string } | null;
+}): User {
+  return {
+    id: su.id,
+    email: su.email ?? "",
+    name: su.user_metadata?.name ?? "",
+  };
+}
 
 export function AuthProvider({
   children,
 }: {
   children: ReactNode;
 }): JSX.Element {
-  const [user, setUser] = useState<User | null>(() => {
-    try {
-      const raw: string | null = localStorage.getItem("user");
-      return raw ? JSON.parse(raw) as User : null;
-    } catch {
-      return null;
-    }
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  function readUsers(): StoredUser[] {
-    try {
-      const raw: string | null = localStorage.getItem("users");
-      return raw ? JSON.parse(raw) as StoredUser[] : [];
-    } catch {
-      return [];
-    }
-  }
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session ? toUser(session.user) : null);
+      setLoading(false);
+    });
 
-  const login = (email: string, password: string) => {
-    const users = readUsers();
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session ? toUser(session.user) : null);
+    });
 
-    const user = users.find((u) => u.email === email);
+    return () => subscription.unsubscribe();
+  }, []);
 
-    if (!user) throw new Error("Пользователь с таким email не найден");
-
-    if (user.password !== password) throw new Error("Неверный пароль");
-
-    const userData: User = { id: user.id, name: user.name, email: user.email };
-    localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData);
+  const login = async (email: string, password: string) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+    if (error) throw new Error(error.message);
   };
 
-  const register = (name: string, email: string, password: string) => {
-    const users: StoredUser[] = readUsers();
-
-    const userExists: boolean = users.some((user) => user.email === email);
-
-    if (userExists) {
-      throw new Error("Этот email уже зарегистрирован");
-    }
-
-    const newUser: StoredUser = {
-      id: crypto.randomUUID(),
-      name: name,
-      email: email,
-      password: password,
-    };
-
-    users.push(newUser);
-    localStorage.setItem("users", JSON.stringify(users));
-
-    const userData: User = {
-      id: newUser.id,
-      name: newUser.name,
-      email: newUser.email,
-    };
-    localStorage.setItem("user", JSON.stringify(userData));
-    setUser(userData);
+  const register = async (name: string, email: string, password: string) => {
+    const { error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: { data: { name } },
+    });
+    if (error) throw new Error(error.message);
   };
 
-  const logout = () => {
-    localStorage.removeItem("user");
-    setUser(null);
+  const logout = async () => {
+    await supabase.auth.signOut();
   };
 
-  const deleteProfile = () => {
+  const deleteProfile = async () => {
     if (!user) return;
-    const users: StoredUser[] = readUsers();
-    const updatedUsers: StoredUser[] = users.filter((u) => u.id !== user.id);
-    localStorage.removeItem(`todos_${user.id}`);
-    localStorage.setItem("users", JSON.stringify(updatedUsers));
-    logout();
+    const { error } = await supabase.rpc("delete_own_account");
+    if (error) throw new Error(error.message);
+    await supabase.auth.signOut();
   };
 
   return (
     <AuthContext.Provider
-      value={{ user, login, register, logout, deleteProfile }}
+      value={{ user, loading, login, register, logout, deleteProfile }}
     >
       {children}
     </AuthContext.Provider>

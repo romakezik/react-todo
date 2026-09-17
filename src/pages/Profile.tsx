@@ -17,9 +17,7 @@ function Profile() {
               <strong>Почта:</strong> {user.email}
             </p>
           </>
-        ) : (
-          null
-        )}
+        ) : null}
 
         <div className="profile-stats">
           <span>Выполнено: {todos.filter((t) => t.completed).length}</span>

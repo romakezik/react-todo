@@ -10,11 +10,11 @@ function RegisterForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     setError("");
     try {
-      register(name, email, password);
+      await register(name, email, password);
       navigate("/");
     } catch (e) {
       if (e instanceof Error) {
