@@ -52,7 +52,7 @@ function useTodos(userId: string | undefined) {
 
     const { data, error } = await supabase
       .from("todos")
-      .insert({ user_id: userId, text: t })
+      .insert({ id: optimistic.id, user_id: userId, text: t })
       .select()
       .single();
 
@@ -81,7 +81,7 @@ function useTodos(userId: string | undefined) {
     try {
       const { data, error } = await supabase
         .from("todos")
-        .update({ completed: !todo.completed })
+        .update({ completed: next })
         .eq("id", id)
         .select()
         .single();
@@ -150,7 +150,7 @@ function useTodos(userId: string | undefined) {
 
       if (error) {
         setTodos((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, text: target?.text } : t)),
+          prev.map((t) => (t.id === id ? { ...t, text: target.text } : t)),
         );
         setActionError(error.message);
       }
