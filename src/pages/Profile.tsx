@@ -2,7 +2,7 @@ import { useAuth } from "../hooks/useAuth";
 import useTodos from "../hooks/useTodos";
 function Profile() {
   const { user, deleteProfile } = useAuth();
-  const { todos } = useTodos(user?.id);
+  const { todos, loading } = useTodos(user?.id);
   return (
     <div className="container">
       <h1>Ваш профиль</h1>
@@ -19,11 +19,19 @@ function Profile() {
           </>
         ) : null}
 
-        <div className="profile-stats">
-          <span>Выполнено: {todos.filter((t) => t.completed).length}</span>
-          <span>Всего задач: {todos.length}</span>
-          <span>Осталось: {todos.filter((t) => !t.completed).length}</span>
-        </div>
+        {loading ? (
+          <div className="profile-stats">
+            <span>…</span>
+            <span>…</span>
+            <span>…</span>
+          </div>
+        ) : (
+          <div className="profile-stats">
+            <span>Выполнено: {todos.filter((t) => t.completed).length}</span>
+            <span>Всего задач: {todos.length}</span>
+            <span>Осталось: {todos.filter((t) => !t.completed).length}</span>
+          </div>
+        )}
       </div>
       <div className="profile-card">
         <h2>Удалить профиль</h2>
