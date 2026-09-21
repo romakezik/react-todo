@@ -143,6 +143,7 @@ function Home() {
                   <button
                     className="btn btn-danger"
                     onClick={() => deleteTodo(todo.id)}
+                    disabled={pendingId !== null}
                     aria-label="Удалить задачу"
                   >
                     ✕
