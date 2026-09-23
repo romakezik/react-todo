@@ -138,7 +138,7 @@ function Home() {
                     onClick={() => toggleTodo(todo.id)}
                     disabled={pendingId !== null}
                   >
-                    {todo.completed ? "отменить" : "Отметить"}
+                    {todo.completed ? "Вернуть" : "Отметить"}
                   </button>
                   <button
                     className="btn btn-danger"
