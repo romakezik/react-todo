@@ -1,38 +1,12 @@
+import { vi, describe, it, expect, beforeEach } from "vitest";
 import { renderHook, waitFor, act } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import type { Todo } from "../types/types";
 import useTodos from "./useTodos";
+import { todo, query, ok, fail } from "../test/helpers";
 
-const { mockFrom } = vi.hoisted(() => ({
-  mockFrom: vi.fn(),
-}));
+const { mockFrom } = vi.hoisted(() => ({ mockFrom: vi.fn() }));
 vi.mock("../lib/supabase", () => ({
   supabase: { from: mockFrom },
 }));
-
-const todo = (id: string, text: string, completed = false): Todo => ({
-  id,
-  text,
-  completed,
-  user_id: "u1",
-  created_at: "2026-09-22T00:00:00Z",
-});
-
-function query(answer: Promise<{ data: unknown; error: unknown }>) {
-  const q: Record<string, unknown> = {
-    select: () => q,
-    order: () => q,
-    eq: () => q,
-    single: () => q,
-    insert: () => q,
-    update: () => q,
-    delete: () => q,
-  };
-  q.then = (resolve: (v: unknown) => unknown) => answer.then(resolve);
-  return q;
-}
-const ok = (data: unknown) => query(Promise.resolve({ data, error: null }));
-const fail = (message: string) => query(Promise.resolve({ data: null, error: { message } }));
 
 describe("useTodos", () => {
   beforeEach(() => vi.clearAllMocks());
