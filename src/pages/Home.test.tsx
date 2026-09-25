@@ -32,7 +32,7 @@ function renderWithAuth(ui: ReactNode) {
 }
 
 describe("Home", () => {
-  beforeEach(() => vi.clearAllMocks());
+  beforeEach(() => vi.resetAllMocks());
   it("показывает задачи после загрузки", async () => {
     mockFrom.mockReturnValueOnce(ok([todo("1", "Молоко"), todo("2", "Хлеб")]));
 
@@ -89,6 +89,7 @@ describe("Home", () => {
 
   it("клик по toggle сразу меняет кнопку до ответа", async () => {
     mockFrom.mockReturnValueOnce(ok([todo("1", "Молоко", false)]));
+
     let resolveToggle!: (v: { data: unknown; error: unknown }) => void;
     const answer = new Promise<{ data: unknown; error: unknown }>(
       (res) => (resolveToggle = res),
@@ -103,8 +104,8 @@ describe("Home", () => {
     });
 
     expect(screen.getByText("Вернуть")).toBeInTheDocument();
-    expect(screen.getByText("Отметить")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "✕" })).toBeDisabled();
+    expect(screen.queryByText("Отметить")).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Удалить задачу" })).toBeDisabled();
 
     await act(async () => {
       resolveToggle({ data: todo("1", "Молоко", true), error: null });
