@@ -50,13 +50,13 @@ describe("useTodos", () => {
 
   it("toggle откатывает изменения при ошибке сервера", async () => {
     mockFrom.mockReturnValueOnce(ok([todo("1", "Молоко")]));
-    mockFrom.mockReturnValueOnce(fail("-сеть"))
+    mockFrom.mockReturnValueOnce(fail("-сеть"));
 
-    const { result } = renderHook(() => useTodos("u1"))
+    const { result } = renderHook(() => useTodos("u1"));
     await waitFor(() => expect(result.current.todos).toHaveLength(1));
 
     await act(async () => {
-      await result.current.toggleTodo("1")
+      await result.current.toggleTodo("1");
     });
 
     expect(result.current.todos[0].completed).toBe(false);
