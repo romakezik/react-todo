@@ -1,9 +1,7 @@
 import useTodos from "../hooks/useTodos";
-import { useAuth } from "../hooks/useAuth";
 import { useState, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
 function Home() {
-  const { user } = useAuth();
   const {
     todos,
     loading,
@@ -14,7 +12,7 @@ function Home() {
     toggleTodo,
     deleteTodo,
     editTodo,
-  } = useTodos(user?.id);
+  } = useTodos();
   const [text, setText] = useState("");
   const [filter, setFilter] = useState("all");
   const [editingId, setEditingId] = useState<string | null>(null);

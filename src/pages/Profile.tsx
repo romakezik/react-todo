@@ -2,7 +2,7 @@ import { useAuth } from "../hooks/useAuth";
 import useTodos from "../hooks/useTodos";
 function Profile() {
   const { user, deleteProfile } = useAuth();
-  const { todos, loading } = useTodos(user?.id);
+  const { todos, loading } = useTodos();
   return (
     <div className="container">
       <h1>Ваш профиль</h1>

@@ -9,13 +9,19 @@ import {
 import type { ReactNode } from "react";
 import Home from "./Home";
 import { AuthContext } from "../hooks/useAuth";
-import type { AuthContextValue } from "../types/types";
-import { todo, ok, fail, query } from "../test/helpers";
+import type { AuthContextValue, Todo } from "../types/types";
+import { todo } from "../test/helpers";
 
-const { mockFrom } = vi.hoisted(() => ({ mockFrom: vi.fn() }));
-vi.mock("../lib/supabase", () => ({
-  supabase: { from: mockFrom },
+const { mockApi } = vi.hoisted(() => ({
+  mockApi: {
+    getTodos: vi.fn(),
+    createTodo: vi.fn(),
+    updateTodo: vi.fn(),
+    deleteTodo: vi.fn(),
+  },
 }));
+
+vi.mock("../lib/api", () => ({ api: mockApi }));
 
 function renderWithAuth(ui: ReactNode) {
   const mockAuth: AuthContextValue = {
@@ -32,9 +38,10 @@ function renderWithAuth(ui: ReactNode) {
 }
 
 describe("Home", () => {
-  beforeEach(() => vi.resetAllMocks());
+  beforeEach(() => vi.clearAllMocks());
+
   it("показывает задачи после загрузки", async () => {
-    mockFrom.mockReturnValueOnce(ok([todo("1", "Молоко"), todo("2", "Хлеб")]));
+    mockApi.getTodos.mockResolvedValueOnce([todo("1", "Молоко"), todo("2", "Хлеб")]);
 
     renderWithAuth(<Home />);
 
@@ -43,7 +50,7 @@ describe("Home", () => {
   });
 
   it("пустое состояние при пустом списке", async () => {
-    mockFrom.mockReturnValueOnce(ok([]));
+    mockApi.getTodos.mockResolvedValueOnce([]);
 
     renderWithAuth(<Home />);
 
@@ -51,7 +58,7 @@ describe("Home", () => {
   });
 
   it("ошибка загрузки вместо списка", async () => {
-    mockFrom.mockReturnValueOnce(fail("ошибка сети"));
+    mockApi.getTodos.mockRejectedValueOnce(new Error("ошибка сети"));
 
     renderWithAuth(<Home />);
 
@@ -60,8 +67,8 @@ describe("Home", () => {
   });
 
   it("клик по toggle отправляет update", async () => {
-    mockFrom.mockReturnValueOnce(ok([todo("1", "Молоко", false)]));
-    mockFrom.mockReturnValueOnce(ok(todo("1", "Молоко", true)));
+    mockApi.getTodos.mockResolvedValueOnce([todo("1", "Молоко", false)]);
+    mockApi.updateTodo.mockResolvedValueOnce(todo("1", "Молоко", true));
 
     renderWithAuth(<Home />);
 
@@ -69,14 +76,15 @@ describe("Home", () => {
     await act(async () => {
       fireEvent.click(btn);
     });
-    expect(mockFrom).toHaveBeenCalledTimes(2);
-    expect(mockFrom).toHaveBeenCalledWith("todos");
+    expect(mockApi.updateTodo).toHaveBeenCalledTimes(1);
+    expect(mockApi.updateTodo).toHaveBeenCalledWith("1", { completed: true });
   });
 
   it("фильтр Активные скрывает выполненные", async () => {
-    mockFrom.mockReturnValueOnce(
-      ok([todo("1", "Молоко", false), todo("2", "Хлеб", true)]),
-    );
+    mockApi.getTodos.mockResolvedValueOnce([
+      todo("1", "Молоко", false),
+      todo("2", "Хлеб", true),
+    ]);
     renderWithAuth(<Home />);
 
     await screen.findByText("Молоко");
@@ -88,13 +96,13 @@ describe("Home", () => {
   });
 
   it("клик по toggle сразу меняет кнопку до ответа", async () => {
-    mockFrom.mockReturnValueOnce(ok([todo("1", "Молоко", false)]));
+    mockApi.getTodos.mockResolvedValueOnce([todo("1", "Молоко", false)]);
 
-    let resolveToggle!: (v: { data: unknown; error: unknown }) => void;
-    const answer = new Promise<{ data: unknown; error: unknown }>(
-      (res) => (resolveToggle = res),
-    );
-    mockFrom.mockReturnValueOnce(query(answer));
+    let resolveToggle!: (v: Todo) => void;
+    const answer = new Promise<Todo>((res) => {
+      resolveToggle = res;
+    });
+    mockApi.updateTodo.mockReturnValueOnce(answer);
 
     renderWithAuth(<Home />);
     const btn = await screen.findByText("Отметить");
@@ -110,7 +118,7 @@ describe("Home", () => {
     ).toBeDisabled();
 
     await act(async () => {
-      resolveToggle({ data: todo("1", "Молоко", true), error: null });
+      resolveToggle(todo("1", "Молоко", true));
     });
     await waitFor(() =>
       expect(screen.getByText("Вернуть")).toBeInTheDocument(),

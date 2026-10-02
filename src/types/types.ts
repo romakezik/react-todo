@@ -1,6 +1,10 @@
-import type { Database } from "./database.types";
-
-export type Todo = Database["public"]["Tables"]["todos"]["Row"];
+export interface Todo {
+  id: string;
+  text: string;
+  completed: boolean;
+  user_id: string;
+  created_at: string;
+}
 export type AuthResponse = { user: User; token: string };
 export interface User {
   id: string;

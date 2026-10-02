@@ -1,8 +1,8 @@
 import { useState, useEffect } from "react";
-import { supabase } from "../lib/supabase";
+import { api } from "../lib/api";
 import type { Todo } from "../types/types";
 
-function useTodos(userId: string | undefined) {
+function useTodos() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -10,59 +10,41 @@ function useTodos(userId: string | undefined) {
   const [pendingId, setPendingId] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!userId) return;
-
     let cancelled = false;
 
     async function fetchTodos() {
       setLoading(true);
       setError(null);
 
-      const { data, error } = await supabase
-        .from("todos")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (cancelled) return;
-      if (error) setError(error.message);
-      else setTodos(data ?? []);
-      setLoading(false);
+      try {
+        const data = await api.getTodos();
+        if (cancelled) return;
+        setTodos(data);
+      } catch (e) {
+        if (cancelled) return;
+        setError(e instanceof Error ? e.message : "Ошибка загрузки");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
     }
 
     fetchTodos();
-
     return () => {
       cancelled = true;
     };
-  }, [userId]);
+  }, []);
 
   const addTodo = async (text: string) => {
     const t = text.trim();
-    if (!t || !userId) return;
+    if (!t) return;
     setActionError(null);
 
-    const optimistic: Todo = {
-      id: crypto.randomUUID(),
-      user_id: userId,
-      text: t,
-      completed: false,
-      created_at: new Date().toISOString(),
-    };
-    setTodos((prev) => [optimistic, ...prev]);
-
-    const { data, error } = await supabase
-      .from("todos")
-      .insert({ id: optimistic.id, user_id: userId, text: t })
-      .select()
-      .single();
-
-    if (error) {
-      setTodos((prev) => prev.filter((t) => t.id !== optimistic.id));
-      setActionError(error.message);
-      return;
+    try {
+      const data = await api.createTodo(t);
+      setTodos((prev) => [data, ...prev]);
+    } catch (e) {
+      setActionError(e instanceof Error ? e.message : "Не удалось сохранить");
     }
-
-    setTodos((prev) => prev.map((t) => (t.id === optimistic.id ? data : t)));
   };
 
   const toggleTodo = async (id: string) => {
@@ -73,29 +55,20 @@ function useTodos(userId: string | undefined) {
 
     setActionError(null);
     setPendingId(id);
-
     setTodos((prev) =>
       prev.map((t) => (t.id === id ? { ...t, completed: next } : t)),
     );
 
     try {
-      const { data, error } = await supabase
-        .from("todos")
-        .update({ completed: next })
-        .eq("id", id)
-        .select()
-        .single();
-
-      if (error) {
-        setTodos((prev) =>
-          prev.map((t) =>
-            t.id === id ? { ...t, completed: todo.completed } : t,
-          ),
-        );
-        setActionError(error.message);
-        return;
-      }
+      const data = await api.updateTodo(id, { completed: next });
       setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
+    } catch (e) {
+      setTodos((prev) =>
+        prev.map((t) =>
+          t.id === id ? { ...t, completed: todo.completed } : t,
+        ),
+      );
+      setActionError(e instanceof Error ? e.message : "Не удалось сохранить");
     } finally {
       setPendingId(null);
     }
@@ -109,19 +82,17 @@ function useTodos(userId: string | undefined) {
 
     setActionError(null);
     setPendingId(id);
-
     setTodos((prev) => prev.filter((t) => t.id !== id));
 
     try {
-      const { error } = await supabase.from("todos").delete().eq("id", id);
-      if (error) {
-        setTodos((prev) => {
-          const copy = [...prev];
-          copy.splice(index, 0, target);
-          return copy;
-        });
-        setActionError(error.message);
-      }
+      await api.deleteTodo(id);
+    } catch (e) {
+      setTodos((prev) => {
+        const copy = [...prev];
+        copy.splice(index, 0, target);
+        return copy;
+      });
+      setActionError(e instanceof Error ? e.message : "Не удалось удалить");
     } finally {
       setPendingId(null);
     }
@@ -140,20 +111,15 @@ function useTodos(userId: string | undefined) {
     setTodos((prev) =>
       prev.map((t) => (t.id === id ? { ...t, text: trimmed } : t)),
     );
-    try {
-      const { error } = await supabase
-        .from("todos")
-        .update({ text: trimmed })
-        .eq("id", id)
-        .select()
-        .single();
 
-      if (error) {
-        setTodos((prev) =>
-          prev.map((t) => (t.id === id ? { ...t, text: target.text } : t)),
-        );
-        setActionError(error.message);
-      }
+    try {
+      const data = await api.updateTodo(id, { text: trimmed });
+      setTodos((prev) => prev.map((t) => (t.id === id ? data : t)));
+    } catch (e) {
+      setTodos((prev) =>
+        prev.map((t) => (t.id === id ? { ...t, text: target.text } : t)),
+      );
+      setActionError(e instanceof Error ? e.message : "Не удалось сохранить");
     } finally {
       setPendingId(null);
     }
