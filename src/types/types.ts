@@ -1,7 +1,7 @@
 import type { Database } from "./database.types";
 
 export type Todo = Database["public"]["Tables"]["todos"]["Row"];
-
+export type AuthResponse = { user: User; token: string };
 export interface User {
   id: string;
   name: string;

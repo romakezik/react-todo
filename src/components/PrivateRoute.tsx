@@ -4,7 +4,7 @@ import { ReactNode } from "react";
 
 function PrivateRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useAuth();
-  if (loading) return null;
+  if (loading) return <div className="container">Загрузка...</div>;
   return user ? <>{children}</> : <Navigate to="/login" />;
 }
 

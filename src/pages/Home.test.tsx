@@ -61,7 +61,7 @@ describe("Home", () => {
 
   it("клик по toggle отправляет update", async () => {
     mockFrom.mockReturnValueOnce(ok([todo("1", "Молоко", false)]));
-    mockFrom.mockReturnValueOnce(ok(todo("1", "Молоко", true))); // ← без []
+    mockFrom.mockReturnValueOnce(ok(todo("1", "Молоко", true)));
 
     renderWithAuth(<Home />);
 
@@ -105,7 +105,9 @@ describe("Home", () => {
 
     expect(screen.getByText("Вернуть")).toBeInTheDocument();
     expect(screen.queryByText("Отметить")).not.toBeInTheDocument();
-    expect(screen.getByRole("button", { name: "Удалить задачу" })).toBeDisabled();
+    expect(
+      screen.getByRole("button", { name: "Удалить задачу" }),
+    ).toBeDisabled();
 
     await act(async () => {
       resolveToggle({ data: todo("1", "Молоко", true), error: null });
