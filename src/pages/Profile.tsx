@@ -1,8 +1,11 @@
+import { useState } from "react";
 import { useAuth } from "../hooks/useAuth";
 import useTodos from "../hooks/useTodos";
 function Profile() {
   const { user, deleteProfile } = useAuth();
   const { todos, loading } = useTodos();
+  const [deleteError, setDeleteError] = useState("");
+
   return (
     <div className="container">
       <h1>Ваш профиль</h1>
@@ -37,14 +40,18 @@ function Profile() {
         <h2>Удалить профиль</h2>
         <button
           className="btn btn-danger"
-          onClick={() => {
-            if (window.confirm("Вы уверены, что хотите удалить профиль?")) {
-              deleteProfile();
+          onClick={async () => {
+            if (!window.confirm("Вы уверены, что хотите удалить профиль?")) return;
+            try {
+              await deleteProfile();
+            } catch (err) {
+              setDeleteError(err instanceof Error ? err.message : "Не удалось удалить профиль");
             }
           }}
         >
           Удалить
         </button>
+        {deleteError && <p className="form-error">{deleteError}</p>}
       </div>
     </div>
   );

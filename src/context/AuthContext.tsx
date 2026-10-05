@@ -49,7 +49,7 @@ export function AuthProvider({
 
   const deleteProfile = async () => {
     if (!user) return;
-    // сделть роут DELETE /api/auth/me
+    await api.deleteProfile();
     localStorage.removeItem("token");
     setUser(null);
   };
