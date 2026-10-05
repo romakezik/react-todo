@@ -36,14 +36,17 @@ function useTodos() {
 
   const addTodo = async (text: string) => {
     const t = text.trim();
-    if (!t) return;
+    if (!t || pendingId) return;
     setActionError(null);
+    setPendingId("add");
 
     try {
       const data = await api.createTodo(t);
       setTodos((prev) => [data, ...prev]);
     } catch (e) {
       setActionError(e instanceof Error ? e.message : "Не удалось сохранить");
+    } finally {
+      setPendingId(null);
     }
   };
 

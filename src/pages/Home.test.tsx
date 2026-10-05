@@ -41,7 +41,10 @@ describe("Home", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("показывает задачи после загрузки", async () => {
-    mockApi.getTodos.mockResolvedValueOnce([todo("1", "Молоко"), todo("2", "Хлеб")]);
+    mockApi.getTodos.mockResolvedValueOnce([
+      todo("1", "Молоко"),
+      todo("2", "Хлеб"),
+    ]);
 
     renderWithAuth(<Home />);
 

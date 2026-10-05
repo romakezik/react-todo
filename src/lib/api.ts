@@ -63,7 +63,7 @@ export const api = {
 
   deleteTodo: (id: string): Promise<void> =>
     request<void>(`/api/todos/${id}`, { method: "DELETE" }),
-  
+
   deleteProfile: (): Promise<void> =>
     request<void>("/api/auth/me", { method: "DELETE" }),
 };

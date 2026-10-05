@@ -41,11 +41,16 @@ function Profile() {
         <button
           className="btn btn-danger"
           onClick={async () => {
-            if (!window.confirm("Вы уверены, что хотите удалить профиль?")) return;
+            if (!window.confirm("Вы уверены, что хотите удалить профиль?"))
+              return;
             try {
               await deleteProfile();
             } catch (err) {
-              setDeleteError(err instanceof Error ? err.message : "Не удалось удалить профиль");
+              setDeleteError(
+                err instanceof Error
+                  ? err.message
+                  : "Не удалось удалить профиль",
+              );
             }
           }}
         >
