@@ -69,16 +69,17 @@ describe("Home", () => {
     expect(screen.queryByText("Молоко")).not.toBeInTheDocument();
   });
 
-  it("клик по toggle отправляет update", async () => {
+  it("клик по чекбоксу отправляет update", async () => {
     mockApi.getTodos.mockResolvedValueOnce([todo("1", "Молоко", false)]);
     mockApi.updateTodo.mockResolvedValueOnce(todo("1", "Молоко", true));
 
     renderWithAuth(<Home />);
 
-    const btn = await screen.findByText("Отметить");
+    const checkbox = (await screen.findAllByRole("checkbox"))[0];
     await act(async () => {
-      fireEvent.click(btn);
+      fireEvent.click(checkbox);
     });
+
     expect(mockApi.updateTodo).toHaveBeenCalledTimes(1);
     expect(mockApi.updateTodo).toHaveBeenCalledWith("1", { completed: true });
   });
@@ -98,7 +99,7 @@ describe("Home", () => {
     expect(screen.getByText(/Осталось: 1/)).toBeInTheDocument();
   });
 
-  it("клик по toggle сразу меняет кнопку до ответа", async () => {
+  it("клик по чекбоксу сразу меняет состояние до ответа", async () => {
     mockApi.getTodos.mockResolvedValueOnce([todo("1", "Молоко", false)]);
 
     let resolveToggle!: (v: Todo) => void;
@@ -108,14 +109,14 @@ describe("Home", () => {
     mockApi.updateTodo.mockReturnValueOnce(answer);
 
     renderWithAuth(<Home />);
-    const btn = await screen.findByText("Отметить");
+    const checkbox = (await screen.findAllByRole("checkbox"))[0];
 
     await act(async () => {
-      fireEvent.click(btn);
+      fireEvent.click(checkbox);
     });
 
-    expect(screen.getByText("Вернуть")).toBeInTheDocument();
-    expect(screen.queryByText("Отметить")).not.toBeInTheDocument();
+    expect(screen.getByRole("checkbox")).toBeChecked();
+
     expect(
       screen.getByRole("button", { name: "Удалить задачу" }),
     ).toBeDisabled();
@@ -123,8 +124,6 @@ describe("Home", () => {
     await act(async () => {
       resolveToggle(todo("1", "Молоко", true));
     });
-    await waitFor(() =>
-      expect(screen.getByText("Вернуть")).toBeInTheDocument(),
-    );
+    await waitFor(() => expect(screen.getByRole("checkbox")).toBeChecked());
   });
 });

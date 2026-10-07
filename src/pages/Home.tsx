@@ -1,6 +1,7 @@
 import useTodos from "../hooks/useTodos";
 import { useState, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
+
 function Home() {
   const {
     todos,
@@ -13,8 +14,9 @@ function Home() {
     deleteTodo,
     editTodo,
   } = useTodos();
+
   const [text, setText] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [filter, setFilter] = useState<"all" | "active" | "completed">("all");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editText, setEditText] = useState("");
   const escapeRef = useRef(false);
@@ -23,136 +25,158 @@ function Home() {
     filter === "all"
       ? todos
       : filter === "active"
-        ? todos.filter((todo) => !todo.completed)
-        : todos.filter((todo) => todo.completed);
+        ? todos.filter((t) => !t.completed)
+        : todos.filter((t) => t.completed);
+
+  const total = todos.length;
+  const completed = todos.filter((t) => t.completed).length;
+  const remaining = total - completed;
 
   return (
     <div className="container">
-      <h1>Ваши задачи</h1>
-      <div className="section">
-        <h2>Добавить новую задачу</h2>
-        <form
-          className="form-group"
-          onSubmit={(e) => {
-            e.preventDefault();
-            addTodo(text);
-            setText("");
-          }}
+      <h1 className="page-title">Ваши задачи</h1>
+
+      <form
+        className="add-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          addTodo(text);
+          setText("");
+        }}
+      >
+        <input
+          className="add-input"
+          type="text"
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          required
+          placeholder="Что нужно сделать?"
+          aria-label="Новая задача"
+        />
+        <button
+          className="btn btn-primary"
+          type="submit"
+          disabled={pendingId !== null || !text.trim()}
         >
-          <input
-            type="text"
-            value={text}
-            onChange={(e) => setText(e.target.value)}
-            required
-            placeholder="Введите задачу"
-          />
-          <button type="submit">Добавить</button>
-        </form>
+          Добавить
+        </button>
+      </form>
+
+      <div className="filters-wrapper">
+        <div className="filter-group">
+          <button
+            type="button"
+            className={`filter-btn ${filter === "all" ? "active" : ""}`}
+            onClick={() => setFilter("all")}
+          >
+            Все
+            <span className="filter-count">{total}</span>
+          </button>
+          <button
+            type="button"
+            className={`filter-btn ${filter === "active" ? "active" : ""}`}
+            onClick={() => setFilter("active")}
+          >
+            Активные
+            <span className="filter-count">{remaining}</span>
+          </button>
+          <button
+            type="button"
+            className={`filter-btn ${filter === "completed" ? "active" : ""}`}
+            onClick={() => setFilter("completed")}
+          >
+            Выполненные
+            <span className="filter-count">{completed}</span>
+          </button>
+        </div>
+        <span className="todo-count">Осталось: {remaining}</span>
       </div>
 
-      <div className="section">
-        <h2>Список задач</h2>
-        <div className="filters-wrapper">
-          <div className="filter-group">
-            <button
-              className={`filter-btn ${filter === "all" ? "active" : ""}`}
-              onClick={() => setFilter("all")}
+      {actionError && (
+        <div className="form-error">Не удалось сохранить: {actionError}</div>
+      )}
+
+      {loading ? (
+        <div className="empty-message">Загружаем задачи…</div>
+      ) : error ? (
+        <div className="empty-message">Ошибка загрузки: {error}</div>
+      ) : todos.length === 0 ? (
+        <div className="empty-message">Пока ничего нет</div>
+      ) : filteredTodos.length === 0 ? (
+        <div className="empty-message">В этой категории пусто</div>
+      ) : (
+        <ul className="todo-list">
+          {filteredTodos.map((todo) => (
+            <li
+              key={todo.id}
+              className={`todo-item ${todo.completed ? "is-done" : ""}`}
             >
-              Все
-            </button>
-            <button
-              className={`filter-btn ${filter === "active" ? "active" : ""}`}
-              onClick={() => setFilter("active")}
-            >
-              Активные
-            </button>
-            <button
-              className={`filter-btn ${filter === "completed" ? "active" : ""}`}
-              onClick={() => setFilter("completed")}
-            >
-              Выполненные
-            </button>
-          </div>
-          <span className="todo-count">
-            Осталось: {todos.filter((t) => !t.completed).length}
-          </span>
-        </div>
-        {actionError && (
-          <div className="form-error">Не удалось сохранить: {actionError}</div>
-        )}
-        {loading ? (
-          <div className="card empty-message">Загружаем задачи…</div>
-        ) : error ? (
-          <div className="card empty-message">Ошибка загрузки: {error}</div>
-        ) : todos.length === 0 ? (
-          <div className="card empty-message">Пока ничего нет</div>
-        ) : filteredTodos.length === 0 ? (
-          <div className="card empty-message">В этой категории пусто</div>
-        ) : (
-          <ul className="todo-list">
-            {filteredTodos.map((todo) => (
-              <li key={todo.id} className="todo-item">
+              <input
+                type="checkbox"
+                className="todo-checkbox"
+                checked={todo.completed}
+                onChange={() => toggleTodo(todo.id)}
+                disabled={pendingId !== null}
+                aria-label={
+                  todo.completed ? "Вернуть задачу" : "Отметить задачу"
+                }
+              />
+
+              {editingId === todo.id ? (
+                <TextareaAutosize
+                  autoFocus
+                  className="todo-edit-input"
+                  value={editText}
+                  onChange={(e) => setEditText(e.target.value)}
+                  onBlur={() => {
+                    if (escapeRef.current) {
+                      escapeRef.current = false;
+                    } else if (editText.trim()) {
+                      editTodo(todo.id, editText);
+                    }
+                    setEditingId(null);
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      e.currentTarget.blur();
+                    }
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      escapeRef.current = true;
+                      e.currentTarget.blur();
+                    }
+                  }}
+                />
+              ) : (
                 <span
-                  className={`todo-text ${todo.completed ? "completed" : ""}`}
+                  className="todo-text"
+                  title="Двойной клик — редактировать"
                   onDoubleClick={() => {
                     if (editingId === todo.id) return;
                     setEditingId(todo.id);
                     setEditText(todo.text);
                   }}
                 >
-                  {editingId === todo.id ? (
-                    <TextareaAutosize
-                      autoFocus
-                      className="todo-edit-input"
-                      value={editText}
-                      onChange={(e) => setEditText(e.target.value)}
-                      onBlur={() => {
-                        if (escapeRef.current) {
-                          escapeRef.current = false;
-                        } else if (editText.trim()) {
-                          editTodo(todo.id, editText);
-                        }
-                        setEditingId(null);
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          e.preventDefault();
-                          e.currentTarget.blur();
-                        }
-                        if (e.key === "Escape") {
-                          e.preventDefault();
-                          escapeRef.current = true;
-                          e.currentTarget.blur();
-                        }
-                      }}
-                    />
-                  ) : (
-                    todo.text
-                  )}
+                  {todo.text}
                 </span>
-                <div className="todo-actions">
-                  <button
-                    className="btn btn-outline"
-                    onClick={() => toggleTodo(todo.id)}
-                    disabled={pendingId !== null}
-                  >
-                    {todo.completed ? "Вернуть" : "Отметить"}
-                  </button>
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => deleteTodo(todo.id)}
-                    disabled={pendingId !== null}
-                    aria-label="Удалить задачу"
-                  >
-                    ✕
-                  </button>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
+              )}
+
+              <button
+                className="todo-delete"
+                onClick={() => deleteTodo(todo.id)}
+                disabled={pendingId !== null}
+                aria-label="Удалить задачу"
+                title="Удалить"
+              >
+                ✕
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
+
 export default Home;

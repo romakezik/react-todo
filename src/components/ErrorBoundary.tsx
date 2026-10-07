@@ -1,4 +1,4 @@
-import { Component, ReactNode } from "react";
+import { Component, type ReactNode } from "react";
 
 interface Props {
   children: ReactNode;
@@ -18,8 +18,16 @@ export class ErrorBoundary extends Component<Props, State> {
     if (this.state.error) {
       return (
         <div className="container">
-          <h1>Что-то сломалось</h1>
-          <p>{String(this.state.error)}</p>
+          <div className="empty-state">
+            <h1 className="page-title">Что-то сломалось</h1>
+            <p className="empty-state__text">{String(this.state.error)}</p>
+            <button
+              className="btn btn-primary"
+              onClick={() => window.location.reload()}
+            >
+              Перезагрузить
+            </button>
+          </div>
         </div>
       );
     }
