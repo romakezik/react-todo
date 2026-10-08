@@ -1,6 +1,6 @@
 import { AuthResponse, Todo, User } from "../types/types";
 
-const BASE_URL = "https://todo-server-production-d9dd.up.railway.app";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
 
 async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   const token = localStorage.getItem("token");
@@ -26,44 +26,44 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
 }
 
 export const api = {
-  register: (
-    email: string,
-    password: string,
-    name: string,
-  ): Promise<AuthResponse> =>
+  register: (email: string, password: string, name: string) =>
     request<AuthResponse>("/api/auth/register", {
       method: "POST",
       body: JSON.stringify({ email, password, name }),
     }),
 
-  login: (email: string, password: string): Promise<AuthResponse> =>
+  login: (email: string, password: string) =>
     request<AuthResponse>("/api/auth/login", {
       method: "POST",
       body: JSON.stringify({ email, password }),
     }),
 
-  me: (): Promise<User> => request<User>("/api/auth/me"),
+  me: () => request<User>("/api/auth/me"),
 
-  getTodos: (): Promise<Todo[]> => request<Todo[]>("/api/todos"),
+  getTodos: () => request<Todo[]>("/api/todos"),
 
-  createTodo: (text: string): Promise<Todo> =>
+  createTodo: (text: string) =>
     request<Todo>("/api/todos", {
       method: "POST",
       body: JSON.stringify({ text }),
     }),
 
-  updateTodo: (
-    id: string,
-    patch: { text?: string; completed?: boolean },
-  ): Promise<Todo> =>
+  updateTodo: (id: string, patch: { text?: string; completed?: boolean }) =>
     request<Todo>(`/api/todos/${id}`, {
       method: "PATCH",
       body: JSON.stringify(patch),
     }),
 
-  deleteTodo: (id: string): Promise<void> =>
+  deleteTodo: (id: string) =>
     request<void>(`/api/todos/${id}`, { method: "DELETE" }),
 
-  deleteProfile: (): Promise<void> =>
-    request<void>("/api/auth/me", { method: "DELETE" }),
+  deleteProfile: () => request<void>("/api/auth/me", { method: "DELETE" }),
+
+  chat: (
+    messages: { role: "user" | "assistant" | "system"; content: string }[],
+  ) =>
+    request<{ reply: string; actions: { type: string; text: string }[] }>(
+      "/api/ai/chat",
+      { method: "POST", body: JSON.stringify({ messages }) },
+    ),
 };

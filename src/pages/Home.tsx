@@ -1,8 +1,11 @@
 import useTodos from "../hooks/useTodos";
+import { useAuth } from "../hooks/useAuth";
 import { useState, useRef } from "react";
 import TextareaAutosize from "react-textarea-autosize";
+import ChatPanel from "../components/ChatPanel";
 
 function Home() {
+  const { user } = useAuth();
   const {
     todos,
     loading,
@@ -175,6 +178,13 @@ function Home() {
           ))}
         </ul>
       )}
+      <ChatPanel
+        key={user?.id ?? "anon"}
+        todos={todos}
+        onAddTodo={addTodo}
+        onToggleTodo={toggleTodo}
+        onDeleteTodo={deleteTodo}
+      />
     </div>
   );
 }
