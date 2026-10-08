@@ -1,17 +1,19 @@
 # ToDo App
 **Демо:** https://romakezik-todo.netlify.app/
 
-Fullstack-приложение для управления задачами: React + TypeScript на фронте, 
+Fullstack-приложение для управления задачами: React + TypeScript на фронте,
 Node.js + Express + JWT на бэкенде, PostgreSQL для данных.
 
 ## Архитектура
-React (Netlify) → Express + JWT (Railway) → PostgreSQL
+React (Netlify) → Express + JWT + AI-прокси (Railway) → PostgreSQL
 
 ## Возможности
 - регистрация и вход по JWT, приватные маршруты, удаление профиля
 - CRUD задач: добавление, редактирование, удаление, отметка выполненных
 - фильтры: все / активные / выполненные
 - оптимистичные обновления с откатом при ошибке сервера
+- AI-ассистент: чат справа, добавляет/отмечает/удаляет задачи по описанию,
+  удаление с подтверждением, история в localStorage по юзеру
 
 ## Стек
 - **Фронт:** React 19, TypeScript, Vite, React Router v7
@@ -20,12 +22,9 @@ React (Netlify) → Express + JWT (Railway) → PostgreSQL
 - **Тесты:** Vitest + Testing Library
 
 ## Деплой
-- Фронт — Netlify
+- Фронт — Netlify (env: `VITE_API_URL`)
 - Бэкенд — Railway
 
 ## Запуск
 npm install
 npm run dev
-
-Backend: [todo-server](https://github.com/romakezik/todo-server) 
-(прод-URL захардкожен в `src/lib/api.ts`).
